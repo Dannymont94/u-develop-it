@@ -81,13 +81,32 @@ app.post('/api/candidate', ({ body }, res) => {
 
   db.run(sql, params, function(err, result) {
     if (err) {
-      return res.status(400).json({ error: err.message});
+      return res.status(400).json({ error: err.message });
     }
 
     return res.json({
       message: 'success',
       data: body,
       id: this.lastID
+    });
+  });
+});
+
+app.put('/api/candidate/:id', (req, res) => {
+  const errors = inputCheck(req.body, 'party_id');
+  if (errors) {
+    return res.status(400).json({ error: errors });
+  }
+  const sql = `UPDATE candidates SET party_id = ? WHERE id = ?`;
+  const params = [req.body.party_id, req.params.id];
+  db.run(sql, params, function(err, result) {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    return res.json({
+      message: 'success',
+      data: req.body,
+      changes: this.changes
     });
   });
 });
@@ -141,5 +160,5 @@ app.use((req, res) => {
 db.on('open', () => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}.`);
-  })
+  });
 });
